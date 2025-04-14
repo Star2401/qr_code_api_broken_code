@@ -27,7 +27,8 @@ async def create_qr_code(request: QRCodeRequest, token: str = Depends(oauth2_sch
     logging.info(f"Creating QR code for URL: {request.url}")
     
     # Encode the URL to a safe filename format
-    encoded_url = encode_url_to_filename(request.url)
+    normalized_url = str(request.url).rstrip("/")  # Remove trailing slash
+    encoded_url = encode_url_to_filename(normalized_url)
     qr_filename = f"{encoded_url}.png"
     qr_code_full_path = QR_DIRECTORY / qr_filename
 
@@ -47,7 +48,7 @@ async def create_qr_code(request: QRCodeRequest, token: str = Depends(oauth2_sch
         )
 
     # Generate the QR code if it does not exist
-    generate_qr_code(request.url, qr_code_full_path, FILL_COLOR, BACK_COLOR, request.size)
+    generate_qr_code(normalized_url, qr_code_full_path, FILL_COLOR, BACK_COLOR, request.size)
     # Return a response indicating successful creation
     return QRCodeResponse(mssage="QR code created successfully.", qr_code_url=qr_code_download_url, links=links)
 
@@ -66,7 +67,7 @@ async def list_qr_codes_endpoint(token: str = Depends(oauth2_scheme)):
     ) for qr_file in qr_files]
     return responses
 
-@router.delete("/qr-codes/{qr_fileame}", status_code=status.HTTP_204_NO_CONTENT, tags=["QR Codes"])
+@router.delete("/qr-codes/{qr_filename}", status_code=status.HTTP_204_NO_CONTENT, tags=["QR Codes"])
 async def delete_qr_code_endpoint(qr_filename: str, token: str = Depends(oauth2_scheme)):
     logging.info(f"Deleting QR code: {qr_filename}.")
     qr_code_path = QR_DIRECTORY / qr_filename
