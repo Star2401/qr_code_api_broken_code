@@ -60,8 +60,8 @@ jobs:
           push: true
           tags: starryeyes/qr-code-api:${{ github.sha }} # Uses the Git SHA for tagging
           platforms: linux/amd64,linux/arm64 # Multi-platform support
-          cache-from: type=registry,ref=starryeyes/qr-code-api:cache
-          cache-to: type=inline,mode=max
+          cache-to: type=registry,ref=starryeyes/qr-code-api:cache,mode=max
+
           
       - name: Scan the Docker image
         uses: aquasecurity/trivy-action@master
